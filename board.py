@@ -13,30 +13,30 @@ class Board:
     def create_pieces(self):
         pieces = []
         # Place pawns
-        #for col in range(BOARD_DIM):
-            #pieces.append(Pawn("white", (6, col), self))  # white pawns are on row 6
-            #pieces.append(Pawn("black", (1, col), self))  # black pawns are on row 1
+        for col in range(BOARD_DIM):
+            pieces.append(Pawn("white", (6, col), self))  # white pawns are on row 6
+            pieces.append(Pawn("black", (1, col), self))  # black pawns are on row 1
 
         # Place Rooks
-        #pieces.append(Rook("white", (7, 0), self))
-        #pieces.append(Rook("white", (7, 7), self))
-        #pieces.append(Rook("black", (0, 0), self))
-        #pieces.append(Rook("black", (0, 7), self))
+        pieces.append(Rook("white", (7, 0), self))
+        pieces.append(Rook("white", (7, 7), self))
+        pieces.append(Rook("black", (0, 0), self))
+        pieces.append(Rook("black", (0, 7), self))
 
         # Place Knights
-        #pieces.append(Knight("white", (7, 1), self))
-        #pieces.append(Knight("white", (7, 6), self))
-        #pieces.append(Knight("black", (0, 1), self))
+        pieces.append(Knight("white", (7, 1), self))
+        pieces.append(Knight("white", (7, 6), self))
+        pieces.append(Knight("black", (0, 1), self))
         pieces.append(Knight("black", (0, 6), self))
 
         # Place Bishops
-        #pieces.append(Bishop("white", (7, 2), self))
-        #pieces.append(Bishop("white", (7, 5), self))
-        #pieces.append(Bishop("black", (0, 2), self))
-        #pieces.append(Bishop("black", (0, 5), self))
+        pieces.append(Bishop("white", (7, 2), self))
+        pieces.append(Bishop("white", (7, 5), self))
+        pieces.append(Bishop("black", (0, 2), self))
+        pieces.append(Bishop("black", (0, 5), self))
 
         # Place Queens
-        #pieces.append(Queen("white", (7, 3), self))
+        pieces.append(Queen("white", (7, 3), self))
         pieces.append(Queen("black", (0, 3), self))
 
         # Place Kings
