@@ -100,7 +100,6 @@ class Game:
                 self.clock.tick(FPS)
 
     def highlight_selection(self, square):
-        # Takes a square position e.g. (2, 1) and highlights it an aqua colour
         pygame.draw.rect(self.window, "khaki1", (square[1] * SQUARE_DIM, square[0] * SQUARE_DIM, SQUARE_DIM,
                                                  SQUARE_DIM))
 
@@ -120,10 +119,9 @@ class Game:
             pygame.draw.rect(self.window, "khaki1", (sq2[1] * SQUARE_DIM, sq2[0] * SQUARE_DIM, SQUARE_DIM, SQUARE_DIM))
 
     def reveal_check(self):
-        for piece in self.engine.board.dict.values():
-            if piece.colour == self.engine.turn and piece.name == "King":
-                king_pos = piece.pos
-        pygame.draw.rect(self.window, "red", (king_pos[1] * SQUARE_DIM, king_pos[0] * SQUARE_DIM,
+        king = next(piece for piece in self.engine.board.dict.values() if piece.name == "King" and
+                    piece.colour == self.engine.turn)
+        pygame.draw.rect(self.window, "red", (king.pos[1] * SQUARE_DIM, king.pos[0] * SQUARE_DIM,
                                               SQUARE_DIM, SQUARE_DIM))
 
     def animate_move(self):
@@ -145,7 +143,7 @@ class Game:
             piece_moved.move((int(start_row + dR * frame / frame_count), int(start_col + dC * frame / frame_count)))
             piece_moved.draw(self.window)
 
-            pygame.display.flip()
+            pygame.display.update()
             self.clock.tick(FPS)
 
 

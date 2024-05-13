@@ -94,7 +94,6 @@ class AI:
         return score
 
     def negamax(self, engine, depth, alpha, beta, turn_multiplier):
-        # Base case: if depth is 0 or game is over, evaluate the board and return
         if depth == 0:
             return turn_multiplier * self.evaluate_board(engine), None
 
@@ -155,21 +154,3 @@ class AI:
         ordered_moves.extend(remaining_moves)
 
         return ordered_moves
-
-
-"""    def evaluate_capture_moves(self, engine, alpha, beta, turn_multiplier):
-        moves = [move for move in engine.get_legal_moves() if move[1] in engine.board.dict]
-        moves.sort(key=lambda move: engine.board.dict[move[1]].value, reverse=True)
-        if len(moves) == 0:
-            return turn_multiplier * self.evaluate_board(engine)
-
-        max_score = float('-inf')
-        for move in moves:
-            engine.make_move(move[0], move[1])
-            score = -self.evaluate_capture_moves(engine, -beta, -alpha, -turn_multiplier)
-            engine.undo_move()
-            max_score = max(max_score, score)
-            alpha = max(alpha, score)
-            if alpha >= beta:
-                break  # Beta cutoff
-        return max_score"""
