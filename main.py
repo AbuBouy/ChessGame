@@ -7,8 +7,11 @@ from ai import AI
 
 class Game:
     def __init__(self):
+        pygame.init()
         self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        pygame.display.set_caption("Chess by Abu")
         self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont("Algerian", 45)
         self.engine = Engine()
         self.ai = AI("black", 4)  # adjust as desired, set colour to None for PvP
 
@@ -95,6 +98,12 @@ class Game:
                 if click_count == 1:
                     self.show_moves(last_square_clicked)
 
+                # Show checkmate/stalemate message if required
+                if self.engine.is_checkmate():
+                    self.display_message("Checkmate!!!", "press R to reset")
+                if self.engine.is_stalemate():
+                    self.display_message("Stalemate -_-", "press R to reset")
+
                 # Display update
                 pygame.display.update()
                 self.clock.tick(FPS)
@@ -140,11 +149,22 @@ class Game:
                 piece.draw(self.window)
             if last_move.piece_captured is not None:
                 last_move.piece_captured.draw(self.window)
-            piece_moved.move((int(start_row + dR * frame / frame_count), int(start_col + dC * frame / frame_count)))
+            piece_moved.move(((start_row + dR * frame / frame_count), (start_col + dC * frame / frame_count)))
             piece_moved.draw(self.window)
 
             pygame.display.update()
             self.clock.tick(FPS)
+
+        piece_moved.pos = (int(piece_moved.pos[0]), int(piece_moved.pos[1]))  # to eliminate any dict key errors
+
+    def display_message(self, message1, message2=None):
+        text1 = self.font.render(message1, True, "green")
+        text1_rect = text1.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 40))
+        self.window.blit(text1, text1_rect)
+        if message2:
+            text2 = self.font.render(message2, True, "green")
+            text2_rect = text2.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 10))
+            self.window.blit(text2, text2_rect)
 
 
 if __name__ == "__main__":

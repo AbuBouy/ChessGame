@@ -27,7 +27,7 @@ class Engine:
         original_can_castle = None
         if piece_to_move.name in ["King", "Rook"]:
             original_can_castle = piece_to_move.can_castle
-            piece_to_move.can_castle = False
+            piece_to_move.can_castle = False  # king/rook can no longer castle due to it being moved
 
         # Check if a castle move was made
         is_castle_move = False

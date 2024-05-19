@@ -91,7 +91,7 @@ class AI:
                 flipped_row_index = 7 - piece.pos[0]  # piece square table is flipped for black pieces
                 score -= self.square_values[piece.name][flipped_row_index][piece.pos[1]]
 
-        return score
+        return round(score, 3)  # to eliminate the rounding error that sometimes occurred with the score
 
     def negamax(self, engine, depth, alpha, beta, turn_multiplier):
         if depth == 0:
