@@ -93,11 +93,14 @@ class AI:
 
         return round(score, 3)  # to eliminate the rounding error that sometimes occurred with the score
 
-    def negamax(self, engine, depth, alpha, beta, turn_multiplier):
+    def negamax(self, engine, depth, alpha, beta, turn_multiplier, prev_best_move=None):
         if depth == 0:
             return turn_multiplier * self.evaluate_board(engine), None
 
         moves = self.order_moves(engine)
+        if prev_best_move:
+            moves = [prev_best_move] + moves   # search from the best move at the previous depth first
+
         if len(moves) == 0:
             if engine.in_check():
                 return float("-inf"), None
@@ -126,7 +129,9 @@ class AI:
     def get_best_move(self, engine):
         # Call negamax to find the best move
         turn_multiplier = 1 if engine.turn == "white" else -1
-        score, best_move = self.negamax(engine, self.depth, float('-inf'), float('inf'), turn_multiplier)
+        best_move = None
+        for depth in range(1, self.depth + 1):
+            score, best_move = self.negamax(engine, depth, float('-inf'), float('inf'), turn_multiplier, best_move)
         return best_move
 
     @staticmethod
