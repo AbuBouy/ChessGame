@@ -13,7 +13,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("Algerian", 45)
         self.engine = Engine()
-        self.ai = AI("black", 4)  # adjust as desired, set colour to None for PvP
+        self.ai = AI("black", 4, self.engine)  # adjust as desired, set colour to None for PvP
 
     def run(self):
         game_ended = False
@@ -22,7 +22,7 @@ class Game:
 
         while not game_ended:
             if self.engine.turn == self.ai.colour:
-                best_move = self.ai.get_best_move(self.engine)
+                best_move = self.ai.get_best_move()
                 if best_move:
                     self.engine.make_move(best_move[0], best_move[1])
                     self.animate_move()

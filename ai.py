@@ -1,7 +1,8 @@
 class AI:
-    def __init__(self, colour, depth):
+    def __init__(self, colour, depth, engine):
         self.colour = colour
         self.depth = depth
+        self.engine = engine
 
         # Piece square tables
         pawn_scores = [
@@ -80,29 +81,28 @@ class AI:
             "King": king_scores
         }
 
-    def evaluate_board(self, engine):
-        score = 0
-        for piece in engine.board.dict.values():
-            if piece.colour == "white":
-                score += piece.value
-                score += self.square_values[piece.name][piece.pos[0]][piece.pos[1]]
-            else:
-                score -= piece.value
-                flipped_row_index = 7 - piece.pos[0]  # piece square table is flipped for black pieces
-                score -= self.square_values[piece.name][flipped_row_index][piece.pos[1]]
+    def evaluate_board(self):
+        score = sum(
+            (1 if piece.colour == "white" else -1) * (
+                    piece.value + self.square_values[piece.name][
+                piece.pos[0] if piece.colour == "white" else 7 - piece.pos[0]
+            ][piece.pos[1]]
+            )
+            for piece in self.engine.board.dict.values()
+        )
 
         return round(score, 3)  # to eliminate the rounding error that sometimes occurred with the score
 
-    def negamax(self, engine, depth, alpha, beta, turn_multiplier, prev_best_move=None):
+    def negamax(self, depth, alpha, beta, turn_multiplier, prev_best_move=None):
         if depth == 0:
-            return turn_multiplier * self.evaluate_board(engine), None
+            return turn_multiplier * self.evaluate_board(), None
 
-        moves = self.order_moves(engine)
+        moves = self.order_moves()
         if prev_best_move:
-            moves = [prev_best_move] + moves   # search from the best move at the previous depth first
+            moves = [prev_best_move] + moves  # search from the best move at the previous depth first
 
         if len(moves) == 0:
-            if engine.in_check():
+            if self.engine.in_check():
                 return float("-inf"), None
             else:
                 return 0, None
@@ -111,10 +111,10 @@ class AI:
         best_move = moves[0]  # a default move is chosen in case all moves evaluate to the same score, e.g. an
         # inevitable checkmate
         for move in moves:
-            engine.make_move(move[0], move[1])
-            score, _ = self.negamax(engine, depth - 1, -beta, -alpha, -turn_multiplier)
+            self.engine.make_move(move[0], move[1])
+            score, _ = self.negamax(depth - 1, -beta, -alpha, -turn_multiplier)
             score *= -1  # Negate the score since it's from the opponent's perspective
-            engine.undo_move()
+            self.engine.undo_move()
 
             if score > max_score:
                 max_score = score
@@ -126,28 +126,27 @@ class AI:
 
         return max_score, best_move
 
-    def get_best_move(self, engine):
+    def get_best_move(self):
         # Call negamax to find the best move
-        turn_multiplier = 1 if engine.turn == "white" else -1
+        turn_multiplier = 1 if self.engine.turn == "white" else -1
         best_move = None
         for depth in range(1, self.depth + 1):
-            score, best_move = self.negamax(engine, depth, float('-inf'), float('inf'), turn_multiplier, best_move)
+            score, best_move = self.negamax(depth, float('-inf'), float('inf'), turn_multiplier, best_move)
         return best_move
 
-    @staticmethod
-    def order_moves(engine):
+    def order_moves(self):
         """Orders the legal moves in a way that will potentially speed up the negamax search"""
         ordered_moves = []
 
-        moves = engine.get_legal_moves()
+        moves = self.engine.get_legal_moves()
         # Prioritise pawn promotions
-        promotion_moves = [move for move in moves if engine.board.dict[move[0]].name == "Pawn" and
+        promotion_moves = [move for move in moves if self.engine.board.dict[move[0]].name == "Pawn" and
                            (move[1][0] == 0 or move[1][0] == 7)]
         ordered_moves.extend(promotion_moves)
 
         # Prioritise capture moves and sort by value of piece captured
-        capture_moves = [move for move in moves if engine.board.dict.get(move[1]) is not None]
-        capture_moves.sort(key=lambda move: engine.board.dict[move[1]].value, reverse=True)
+        capture_moves = [move for move in moves if self.engine.board.dict.get(move[1]) is not None]
+        capture_moves.sort(key=lambda move: self.engine.board.dict[move[1]].value, reverse=True)
         ordered_moves.extend(capture_moves)
 
         # Prioritise moves that control central squares
