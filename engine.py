@@ -1,18 +1,18 @@
 from board import Board
 from settings import *
-from pieces import Queen, Pawn
+from pieces import Piece, Queen, Pawn, King
 
 
 class Engine:
     def __init__(self):
         self.board = Board()
         self.turn = "white"  # white moves first
-        self.move_log = []  # list of Move objects to track moves made in the game
+        self.move_log: list[Move] = []  # track moves made in the game
 
     def switch_turn(self):
         self.turn = "black" if self.turn == "white" else "white"
 
-    def make_move(self, start_square, end_square):
+    def make_move(self, start_square: BoardPosition | tuple[int, int], end_square: BoardPosition | tuple[int, int]):
         piece_to_move = self.board.dict.pop(start_square)  # remove piece from start square
 
         is_promotion = False
@@ -24,7 +24,7 @@ class Engine:
                 is_promotion = True
 
         # If the King or a rook was moved, keep track of whether it could castle before the move was made
-        original_can_castle = None
+        original_can_castle = False
         if piece_to_move.name in ["King", "Rook"]:
             original_can_castle = piece_to_move.can_castle
             piece_to_move.can_castle = False  # king/rook can no longer castle due to it being moved
@@ -53,7 +53,8 @@ class Engine:
 
         # Update the move log
         piece_captured = self.board.dict.get(end_square)
-        self.move_log.append(Move(start_square, end_square, piece_captured, is_promotion, is_castle_move, original_can_castle))
+        self.move_log.append(
+            Move(start_square, end_square, piece_captured, is_promotion, is_castle_move, original_can_castle))
 
         # Move piece to end square
         piece_to_move.move(end_square)
@@ -107,7 +108,7 @@ class Engine:
         for _ in range(len(self.move_log)):
             self.undo_move()
 
-    def is_attacked(self, square):
+    def is_attacked(self, square: BoardPosition) -> bool:
         # Check diagonals for enemy bishops/queen/king
         directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
         for direction in directions:
@@ -175,7 +176,7 @@ class Engine:
         king = next(piece for piece in self.board.dict.values() if piece.name == "King" and piece.colour == self.turn)
         return self.is_attacked(king.pos)
 
-    def legal_moves(self, piece):
+    def legal_moves(self, piece: Piece) -> list[BoardPosition]:
         """Filters a piece's possible moves to not include those that will put the king in check"""
         legal_moves = []
         start_square = piece.pos
@@ -195,7 +196,7 @@ class Engine:
 
         return legal_moves
 
-    def is_checkmate(self):
+    def is_checkmate(self) -> bool:
         # Checkmate if king is in check and there are no possible legal moves
         if self.in_check():
             for piece in list(self.board.dict.values()):
@@ -205,7 +206,7 @@ class Engine:
             return True  # If no piece can move, it's checkmate
         return False  # If the king is not in check, it's not checkmate
 
-    def is_stalemate(self):
+    def is_stalemate(self) -> bool:
         # Stalemate if there are no possible legal moves while king is not in check
         if not self.in_check():
             for piece in list(self.board.dict.values()):
@@ -215,28 +216,28 @@ class Engine:
             return True
         return False
 
-    def add_castle_moves(self, king):
+    def add_castle_moves(self, king: King) -> list[BoardPosition]:
         castle_moves = []
         if not self.in_check() and king.can_castle:  # cannot castle whilst in check
             # King-side castling
             kingside_piece = self.board.dict.get((king.pos[0], 7))
             if kingside_piece is not None and kingside_piece.name == "Rook":
                 # Allowed to castle if the square the king has to move over is not being attacked
-                if (kingside_piece.can_castle and not self.is_attacked((king.pos[0], 5)) and
-                        not self.is_attacked((king.pos[0], 6))):
+                if (kingside_piece.can_castle and not self.is_attacked(BoardPosition(king.pos[0], 5)) and
+                        not self.is_attacked(BoardPosition(king.pos[0], 6))):
                     if (king.pos[0], 5) not in self.board.dict and (king.pos[0], 6) not in self.board.dict:
-                        castle_moves.append((king.pos[0], 6))
+                        castle_moves.append(BoardPosition(king.pos[0], 6))
             # Queen-side castling
             queenside_piece = self.board.dict.get((king.pos[0], 0))
             if queenside_piece is not None and queenside_piece.name == "Rook":
                 # Allowed to castle if the square the king has to move over is not being attacked
-                if (queenside_piece.can_castle and not self.is_attacked((king.pos[0], 3)) and
-                        not self.is_attacked((king.pos[0], 2))):
+                if (queenside_piece.can_castle and not self.is_attacked(BoardPosition(king.pos[0], 3)) and
+                        not self.is_attacked(BoardPosition(king.pos[0], 2))):
                     if (king.pos[0], 3) not in self.board.dict and (king.pos[0], 2) not in self.board.dict:
-                        castle_moves.append((king.pos[0], 2))
+                        castle_moves.append(BoardPosition(king.pos[0], 2))
         return castle_moves
 
-    def get_legal_moves(self):
+    def get_legal_moves(self) -> list[tuple[BoardPosition, BoardPosition]]:
         moves = []
         for piece in list(self.board.dict.values()):
             if piece.colour == self.turn:
@@ -246,7 +247,8 @@ class Engine:
 
 
 class Move:
-    def __init__(self, start_square, end_square, piece_captured, is_promotion, is_castle_move, original_can_castle=None):
+    def __init__(self, start_square: BoardPosition, end_square: BoardPosition, piece_captured: Piece,
+                 is_promotion: bool, is_castle_move: bool, original_can_castle: bool = False):
         self.start_square = start_square
         self.end_square = end_square
         self.piece_captured = piece_captured

@@ -1,5 +1,8 @@
+from settings import BoardPosition
+import random
+
 class AI:
-    def __init__(self, colour, depth, engine):
+    def __init__(self, colour: str, depth: int, engine):
         self.colour = colour
         self.depth = depth
         self.engine = engine
@@ -81,7 +84,7 @@ class AI:
             "King": king_scores
         }
 
-    def evaluate_board(self):
+    def evaluate_board(self) -> float:
         score = sum(
             (1 if piece.colour == "white" else -1) * (
                     piece.value + self.square_values[piece.name][
@@ -93,7 +96,9 @@ class AI:
 
         return round(score, 3)  # to eliminate the rounding error that sometimes occurred with the score
 
-    def negamax(self, depth, alpha, beta, turn_multiplier, prev_best_move=None):
+    def negamax(self, depth: int, alpha: float, beta: float, turn_multiplier: int,
+                prev_best_move: tuple[BoardPosition, BoardPosition] | None = None) -> tuple[
+                float, tuple[BoardPosition, BoardPosition] | None]:
         if depth == 0:
             return turn_multiplier * self.evaluate_board(), None
 
@@ -108,7 +113,7 @@ class AI:
                 return 0, None
 
         max_score = float("-inf")
-        best_move = moves[0]  # a default move is chosen in case all moves evaluate to the same score, e.g. an
+        best_move = random.choice(moves)  # a default move is chosen in case all moves evaluate to the same score, e.g. an
         # inevitable checkmate
         for move in moves:
             self.engine.make_move(move[0], move[1])
@@ -126,7 +131,7 @@ class AI:
 
         return max_score, best_move
 
-    def get_best_move(self):
+    def get_best_move(self) -> tuple[BoardPosition, BoardPosition]:
         # Call negamax to find the best move
         turn_multiplier = 1 if self.engine.turn == "white" else -1
         best_move = None
@@ -134,7 +139,7 @@ class AI:
             score, best_move = self.negamax(depth, float('-inf'), float('inf'), turn_multiplier, best_move)
         return best_move
 
-    def order_moves(self):
+    def order_moves(self) -> list[tuple[BoardPosition, BoardPosition]]:
         """Orders the legal moves in a way that will potentially speed up the negamax search"""
         ordered_moves = []
 

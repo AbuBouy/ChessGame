@@ -4,7 +4,6 @@ from settings import *
 from engine import Engine
 from ai import AI
 
-
 class Game:
     def __init__(self):
         pygame.init()
@@ -108,11 +107,11 @@ class Game:
                 pygame.display.update()
                 self.clock.tick(FPS)
 
-    def highlight_selection(self, square):
+    def highlight_selection(self, square: tuple[int, int]):
         pygame.draw.rect(self.window, "khaki1", (square[1] * SQUARE_DIM, square[0] * SQUARE_DIM, SQUARE_DIM,
                                                  SQUARE_DIM))
 
-    def show_moves(self, start_square):
+    def show_moves(self, start_square: tuple[int, int]):
         piece = self.engine.board.dict[start_square]
         end_squares = self.engine.legal_moves(piece)
         for end_square in end_squares:
@@ -155,9 +154,11 @@ class Game:
             pygame.display.update()
             self.clock.tick(FPS)
 
-        piece_moved.pos = (int(piece_moved.pos[0]), int(piece_moved.pos[1]))  # to eliminate any dict key errors
+        piece_moved.pos = (end_row, end_col)  # to eliminate any dict key errors
+        pygame.display.update()
+        self.clock.tick(FPS)
 
-    def display_message(self, message1, message2=None):
+    def display_message(self, message1: str, message2: str | None = None):
         text1 = self.font.render(message1, True, "green")
         text1_rect = text1.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 40))
         self.window.blit(text1, text1_rect)

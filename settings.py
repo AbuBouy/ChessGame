@@ -1,6 +1,13 @@
+from typing import NamedTuple
+
 # Constants
 BOARD_DIM = 8
 SQUARE_DIM = 72
 WINDOW_WIDTH = SQUARE_DIM * BOARD_DIM
 WINDOW_HEIGHT = SQUARE_DIM * BOARD_DIM
 FPS = 60
+
+
+class BoardPosition(NamedTuple):
+    row: int
+    col: int
